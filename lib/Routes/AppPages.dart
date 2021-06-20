@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 
-import '../login_widget.dart';
+import '../Widgets/login_widget.dart';
 import 'Routes.dart';
 
 class AppPages {
