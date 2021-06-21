@@ -121,14 +121,14 @@ class LoginController extends GetxController {
   }
 
   void registerUser(
-      {@required String? email,
+      {@required String? emailId,
       @required String? password,
       BuildContext? context}) async {
     // _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
-    // changeFireBaseAuthStatus(FireBaseAuthStatus.progress);
+    changeFireBaseAuthStatus(FireBaseAuthStatus.progress);
     UserCredential authResult = await _firebaseAuth
         .createUserWithEmailAndPassword(
-            email: email!.trim(), password: password!.trim())
+            email: emailId!.trim(), password: password!.trim())
         .catchError(
       (error) {
         //에러캐치해서 스낵바 실행시키기
@@ -149,8 +149,8 @@ class LoginController extends GetxController {
         Get.defaultDialog(middleText: _message);
       },
     );
-
-    // notifyListeners();
+    changeFireBaseAuthStatus();
+    update();
   }
 
   void signOut() {
