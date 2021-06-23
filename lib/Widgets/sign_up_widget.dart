@@ -9,6 +9,7 @@ class SignUp extends StatelessWidget {
   final _loginController = Get.put(LoginController());
   TextEditingController _emailIdController = TextEditingController();
   TextEditingController _pwdController = TextEditingController();
+  TextEditingController _confirmpwdController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -69,7 +70,7 @@ class SignUp extends StatelessWidget {
                   height: 20,
                 ),
                 TextFormField(
-                  controller: _pwdController,
+                  controller: _confirmpwdController,
                   // decoration: InputDecoration(
                   //   border: OutlineInputBorder(),
                   //   labelText: '비밀번호를 넣어주세요',

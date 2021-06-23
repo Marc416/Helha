@@ -98,8 +98,13 @@ class LoginController extends GetxController {
       );
     });
     _firebaseUser = authResult.user;
+    watchAuthChange();
     changeFireBaseAuthStatus();
-    if (_firebaseUser!.emailVerified) {
+    if (_firebaseUser!.emailVerified == false) {
+      await _firebaseUser?.sendEmailVerification();
+      Get.back();
+      Get.defaultDialog(middleText: "이메일 인증을 한뒤 다시 로그인 해주세요.");
+    } else {
       Get.back();
       Get.defaultDialog(middleText: "로그인 완료되었습니다.");
     }
@@ -124,7 +129,6 @@ class LoginController extends GetxController {
       {@required String? emailId,
       @required String? password,
       BuildContext? context}) async {
-    // _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
     changeFireBaseAuthStatus(FireBaseAuthStatus.progress);
     UserCredential authResult = await _firebaseAuth
         .createUserWithEmailAndPassword(
@@ -149,7 +153,9 @@ class LoginController extends GetxController {
         Get.defaultDialog(middleText: _message);
       },
     );
-    changeFireBaseAuthStatus();
+    await _firebaseUser?.sendEmailVerification();
+    Get.defaultDialog(middleText: '이메일 인증을 한 뒤 로그인 해 주세요.');
+    watchAuthChange();
     update();
   }
 
