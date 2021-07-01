@@ -1,9 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:helha/Data/repositories/sharedpreferences.dart';
 
 class LoginController extends GetxController {
   FireBaseAuthStatus _fireBaseAuthStatus = FireBaseAuthStatus.signout;
+  final _sharedPreferencesController = Get.put(SharedPreferencesRepository());
   User? _firebaseUser;
 
   FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -11,13 +14,16 @@ class LoginController extends GetxController {
   void watchAuthChange() {
     ///스트림으로 파이어베이스 User데이터를 스트림으로 바뀔때마다 계속 받아 온다
     ///Stream<User>라는 것은 User데이터를 넘겨준다는 것임
-    _firebaseAuth.authStateChanges().listen((firebaseUser) {
+    _firebaseAuth.authStateChanges().listen((firebaseUser) async {
       if (_firebaseUser == null && firebaseUser == null) {
         ///처음에 파이어베이스로부터 받는 user 정보가 null 이기 때문에 Progress 상태에서
         ///Sign out 상태로 바꿔주기 위함.
         changeFireBaseAuthStatus();
       } else if (_firebaseUser != firebaseUser) {
         _firebaseUser = firebaseUser;
+        FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+        final accessToken = await _firebaseMessaging.getToken();
+        _sharedPreferencesController.saveAccessToken(accessToken!);
         changeFireBaseAuthStatus();
       }
     });
