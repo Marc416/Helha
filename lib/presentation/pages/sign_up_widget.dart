@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:helha/presentation/widgets/oauth_validate_widget.dart';
-import 'package:helha/usecases/login_controller.dart';
+import 'package:helha/usecases/firebase_auth_user_impl.dart';
 
 import 'login_widget.dart';
 
 class SignUp extends StatelessWidget {
-  final _loginController = Get.put(IcredentialImpl());
+  final _loginController = Get.put(FirebaseAuthUserImpl());
   TextEditingController _emailIdController = TextEditingController();
   TextEditingController _pwdController = TextEditingController();
   TextEditingController _confirmpwdController = TextEditingController();
