@@ -83,18 +83,6 @@ class FirebaseAuthUserImpl extends GetxController implements IFirebaseAuthUser {
     }
   }
 
-  Future<bool> findPassWord({required String email}) async {
-    bool result = true;
-
-    await _firebaseAuth
-        .sendPasswordResetEmail(email: email)
-        .catchError((onError) {
-      return result = false;
-    });
-    return result;
-  }
-
-  @override
   void registerUser(
       {@required String? emailId,
       @required String? password,
