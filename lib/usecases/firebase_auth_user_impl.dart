@@ -83,6 +83,7 @@ class FirebaseAuthUserImpl extends GetxController implements IFirebaseAuthUser {
     }
   }
 
+  @override
   void registerUser(
       {@required String? emailId,
       @required String? password,
