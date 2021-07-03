@@ -2,14 +2,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:helha/Data/repositories/sharedpreferences.dart';
+import 'package:helha/data/repositories/i_user_repo.dart';
+import 'package:helha/data/repositories/shared_preferences_impl.dart';
 
 import 'firebase_oauthStatus.dart';
 import 'i_firebase_auth_user.dart';
 
 class FirebaseAuthUserImpl extends GetxController implements IFirebaseAuthUser {
   FireBaseAuthStatus _fireBaseAuthStatus = FireBaseAuthStatus.signout;
-  final _sharedPreferencesController = Get.put(SharedPreferencesRepository());
+  final IUserRepo _userRepo = SharedPreferencesImpl();
   User? _firebaseUser;
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
@@ -30,7 +31,7 @@ class FirebaseAuthUserImpl extends GetxController implements IFirebaseAuthUser {
         changeFireBaseAuthStatus();
       } else if (_firebaseUser != firebaseUser) {
         _firebaseUser = firebaseUser;
-        _sharedPreferencesController.saveAccessToken(await getAccessToken());
+        _userRepo.saveAccessToken(await getAccessToken());
         changeFireBaseAuthStatus();
       }
     });
