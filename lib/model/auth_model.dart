@@ -1,9 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:helha/entities/client_info.dart';
-
-class CredentialModel {
+class AuthModel {
   final String accessToken;
-  CredentialModel(
+  AuthModel(
     this.accessToken,
   );
 
