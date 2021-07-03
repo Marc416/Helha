@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
-import 'package:helha/Widgets/sign_up_widget.dart';
+import 'package:helha/presentation/pages/login_widget.dart';
+import 'package:helha/presentation/pages/sign_up_widget.dart';
 
-import '../Widgets/login_widget.dart';
 import 'Routes.dart';
 
 class AppPages {

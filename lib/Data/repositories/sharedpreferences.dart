@@ -9,7 +9,7 @@ class SharedPreferencesRepository extends GetxController {
     super.onInit();
   }
 
-  void saveAccessToken(String accessToken) async {
-    await _sharedPreferences!.setString('accessToken', accessToken);
+  void saveAccessToken(String? accessToken) async {
+    await _sharedPreferences!.setString('accessToken', accessToken!);
   }
 }

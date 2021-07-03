@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:helha/Controller/login_controller.dart';
-import 'package:helha/Widgets/oauth_validate_widget.dart';
-import 'package:helha/Widgets/sign_up_widget.dart';
+import 'package:helha/usecases/login_controller.dart';
+
+import '../Widgets/oauth_validate_widget.dart';
+import 'sign_up_widget.dart';
 
 class LoginWidget extends StatelessWidget {
-  final _loginController = Get.put(LoginController());
+  final _loginController = Get.put(IcredentialImpl());
   TextEditingController _emailIdController = TextEditingController();
   TextEditingController _pwdController = TextEditingController();
   @override
