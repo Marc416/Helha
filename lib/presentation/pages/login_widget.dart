@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:helha/Controller/login_controller.dart';
-import 'package:helha/Widgets/login_widget.dart';
+import 'package:helha/usecases/firebase_auth_user_impl.dart';
 
-import 'oauth_validate_widget.dart';
+import '../Widgets/oauth_validate_widget.dart';
+import 'sign_up_widget.dart';
 
-class SignUp extends StatelessWidget {
-  final _loginController = Get.put(LoginController());
+class LoginWidget extends StatelessWidget {
+  final _loginController = Get.put(FirebaseAuthUserImpl());
   TextEditingController _emailIdController = TextEditingController();
   TextEditingController _pwdController = TextEditingController();
   @override
@@ -23,7 +23,7 @@ class SignUp extends StatelessWidget {
                 SizedBox(
                   height: 100,
                 ),
-                Center(child: Text('헬하 가입하기')),
+                Center(child: Text('헬하')),
                 SizedBox(
                   height: 50,
                 ),
@@ -61,45 +61,23 @@ class SignUp extends StatelessWidget {
                   cursorColor: Colors.black,
                   obscureText: true,
                   decoration: oauthValidateWidget(
-                    hint: '사용할 비밀번호를 입력하세요',
-                    iconData: Icons.lock_outline,
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                TextFormField(
-                  controller: _pwdController,
-                  // decoration: InputDecoration(
-                  //   border: OutlineInputBorder(),
-                  //   labelText: '비밀번호를 넣어주세요',
-                  // ),
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  validator: (value) {
-                    if (value!.isNotEmpty && value.length >= 6) {
-                      return null;
-                    } else
-                      return '6자리 이상 비밀번호를 입력해 주세요';
-                  },
-                  cursorColor: Colors.black,
-                  obscureText: true,
-                  decoration: oauthValidateWidget(
-                    hint: '비밀번호를 다시 입력하세요',
+                    hint: '비밀번호를 입력하세요',
                     iconData: Icons.lock_outline,
                   ),
                 ),
                 ElevatedButton(
                     onPressed: () {
-                      _loginController.registerUser(
+                      _loginController.signOut();
+                      _loginController.emailLogin(
                           emailId: _emailIdController.text,
                           password: _pwdController.text);
                     },
-                    child: Text('가입하기')),
+                    child: Text('로그인')),
                 ElevatedButton(
                     onPressed: () {
-                      Get.offAll(LoginWidget());
+                      Get.offAll(SignUp());
                     },
-                    child: Text('로그인 하러가기')),
+                    child: Text('가입하기')),
               ],
             ),
           ),

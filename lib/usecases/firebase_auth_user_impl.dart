@@ -1,73 +1,43 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:helha/data/repositories/i_user_repo.dart';
+import 'package:helha/data/repositories/shared_preferences_impl.dart';
 
-class LoginController extends GetxController {
+import 'firebase_oauthStatus.dart';
+import 'i_firebase_auth_user.dart';
+
+class FirebaseAuthUserImpl extends GetxController implements IFirebaseAuthUser {
   FireBaseAuthStatus _fireBaseAuthStatus = FireBaseAuthStatus.signout;
+  final IUserRepo _userRepo = SharedPreferencesImpl();
   User? _firebaseUser;
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
-  FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  @override
+  FireBaseAuthStatus get fireBaseAuthStatus => _fireBaseAuthStatus;
+  FirebaseAuth get fireBaseAuth => _firebaseAuth;
 
-  void watchAuthChange() {
-    ///스트림으로 파이어베이스 User데이터를 스트림으로 바뀔때마다 계속 받아 온다
-    ///Stream<User>라는 것은 User데이터를 넘겨준다는 것임
-    _firebaseAuth.authStateChanges().listen((firebaseUser) {
+  @override
+  set fireBaseAuthStatus(FireBaseAuthStatus status) {
+    _fireBaseAuthStatus = status;
+    update();
+  }
+
+  @override
+  void watchUserAuthChange() {
+    _firebaseAuth.authStateChanges().listen((firebaseUser) async {
       if (_firebaseUser == null && firebaseUser == null) {
-        ///처음에 파이어베이스로부터 받는 user 정보가 null 이기 때문에 Progress 상태에서
-        ///Sign out 상태로 바꿔주기 위함.
         changeFireBaseAuthStatus();
       } else if (_firebaseUser != firebaseUser) {
         _firebaseUser = firebaseUser;
+        _userRepo.saveAccessToken(await getAccessToken());
         changeFireBaseAuthStatus();
       }
     });
   }
 
-  // Future<void> mobileLogin(String phoneNumber, BuildContext context) async {
-  //   _firebaseAuth.verifyPhoneNumber(
-  //     phoneNumber: phoneNumber,
-  //     //메시지를 받기까지 최대 몇초기다리게 할 것인
-  //     timeout: Duration(seconds: 10),
-  //     //이미 가임되서 아이디가 있는경우
-  //     verificationCompleted: (phoneAuthCredential) async {
-  //       var authResult =
-  //           await _firebaseAuth.signInWithCredential(phoneAuthCredential);
-  //       _firebaseUser = authResult.user;
-  //       if (_firebaseUser == null) {
-  //         SnackBar snackBar = SnackBar(
-  //             content: Text(
-  //           '오류가 떴으니 나중에 다시해주세요.',
-  //         ));
-  //         Scaffold.of(context).showSnackBar(snackBar);
-  //       }
-  //     },
-  //     verificationFailed: (error) {
-  //       Get.defaultDialog(middleText: '에러 : $error');
-  //     codeSent: (verificationId, forceResendingToken) {
-  //       try {
-  //         showDialog(
-  //             context: context,
-  //             barrierDismissible: false,
-  //             builder: (context) {
-  //               return ConfirmOTP(
-  //                 verificationId: verificationId,
-  //                 firebaseAuth: _firebaseAuth,
-  //                 firebaseUser: _firebaseUser,
-  //                 context: context,
-  //               );
-  //             });
-  //       } catch (e) {
-  //         print('codeSent :$e');
-  //       }
-  //     },
-  //     codeAutoRetrievalTimeout: (verificationId) {
-  //       verificationId = verificationId;
-  //       print(verificationId);
-  //       print('timeOut');
-  //     },
-  //   );
-  // }
-
+  @override
   void emailLogin(
       {@required String? emailId,
       @required String? password,
@@ -93,13 +63,18 @@ class LoginController extends GetxController {
           break;
       }
       Get.defaultDialog(
-        // TODO : 확인버튼만들기
-        middleText: _message,
-      );
+          // TODO : 확인버튼만들기
+          middleText: _message,
+          confirm: Text('확인'));
     });
     _firebaseUser = authResult.user;
+    watchUserAuthChange();
     changeFireBaseAuthStatus();
-    if (_firebaseUser!.emailVerified) {
+    if (_firebaseUser!.emailVerified == false) {
+      await _firebaseUser?.sendEmailVerification();
+      Get.back();
+      Get.defaultDialog(middleText: "이메일 인증을 한뒤 다시 로그인 해주세요.");
+    } else {
       Get.back();
       Get.defaultDialog(middleText: "로그인 완료되었습니다.");
     }
@@ -109,22 +84,11 @@ class LoginController extends GetxController {
     }
   }
 
-  Future<bool> findPassWord({required String email}) async {
-    bool result = true;
-
-    await _firebaseAuth
-        .sendPasswordResetEmail(email: email)
-        .catchError((onError) {
-      return result = false;
-    });
-    return result;
-  }
-
+  @override
   void registerUser(
       {@required String? emailId,
       @required String? password,
       BuildContext? context}) async {
-    // _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
     changeFireBaseAuthStatus(FireBaseAuthStatus.progress);
     UserCredential authResult = await _firebaseAuth
         .createUserWithEmailAndPassword(
@@ -149,10 +113,13 @@ class LoginController extends GetxController {
         Get.defaultDialog(middleText: _message);
       },
     );
-    changeFireBaseAuthStatus();
+    await _firebaseUser?.sendEmailVerification();
+    Get.defaultDialog(middleText: '이메일 인증을 한 뒤 로그인 해 주세요.');
+    watchUserAuthChange();
     update();
   }
 
+  @override
   void signOut() {
     _fireBaseAuthStatus = FireBaseAuthStatus.signout;
     if (_firebaseUser != null) {
@@ -162,6 +129,7 @@ class LoginController extends GetxController {
     update();
   }
 
+  @override
   void changeFireBaseAuthStatus([FireBaseAuthStatus? firebaseAuthStatus]) {
     if (firebaseAuthStatus != null) {
       //매개변수로 받은 변수에 status변수가 null이아니면 private변수인 status변수를 바꿔준다.
@@ -179,13 +147,9 @@ class LoginController extends GetxController {
     update();
   }
 
-  FireBaseAuthStatus get fireBaseAuthStatus => _fireBaseAuthStatus;
-  FirebaseAuth get fireBaseAuth => _firebaseAuth;
-
-  set fireBaseAuthStatus(FireBaseAuthStatus status) {
-    _fireBaseAuthStatus = status;
-    update();
+  @override
+  Future<String?> getAccessToken() async {
+    FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+    return await _firebaseMessaging.getToken();
   }
 }
-
-enum FireBaseAuthStatus { progress, signin, signout }
